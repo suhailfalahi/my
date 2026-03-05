@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Master - 50 Quizzes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .header { text-align: center; color: white; margin-bottom: 40px; }
+        .header h1 { font-size: 3.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { font-size: 1.2rem; opacity: 0.9; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .stats { background: white; border-radius: 20px; padding: 30px; margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .stat-box { text-align: center; padding: 20px; border-radius: 15px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .stat-box:nth-child(2) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-box:nth-child(3) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .stat-num { font-size: 3rem; font-weight: bold; }
+        .stat-label { font-size: 1rem; margin-top: 10px; opacity: 0.9; }
+        .search-filter { background: white; border-radius: 20px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .search-box { width: 100%; padding: 15px 20px; font-size: 1.1rem; border: 2px solid #e0e0e0; border-radius: 10px; margin-bottom: 20px; }
+        .search-box:focus { outline: none; border-color: #667eea; }
+        .filter-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .filter-btn { background: #f0f0f0; color: #333; padding: 12px 25px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: all 0.3s; }
+        .filter-btn:hover { background: #e0e0e0; transform: translateY(-2px); }
+        .filter-btn.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .quiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .quiz-card { background: white; border-radius: 20px; padding: 30px; cursor: pointer; transition: all 0.4s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; overflow: hidden; }
+        .quiz-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, #667eea, #764ba2); }
+        .quiz-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+        .quiz-icon { font-size: 4rem; text-align: center; margin-bottom: 15px; }
+        .quiz-title { font-size: 1.4rem; color: #333; font-weight: bold; text-align: center; margin-bottom: 10px; }
+        .quiz-desc { font-size: 0.95rem; color: #666; text-align: center; margin-bottom: 20px; min-height: 40px; }
+        .quiz-meta { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 2px solid #f0f0f0; }
+        .quiz-info { font-size: 0.9rem; color: #999; }
+        .difficulty { padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+        .difficulty.Easy { background: #e8f5e9; color: #2e7d32; }
+        .difficulty.Medium { background: #fff3e0; color: #f57c00; }
+        .difficulty.Hard { background: #ffebee; color: #c62828; }
+        .best-score { text-align: center; margin-top: 10px; padding: 8px; background: #f0f7ff; border-radius: 10px; color: #667eea; font-weight: bold; font-size: 0.9rem; }
+        .completed-badge { position: absolute; top: 15px; right: 15px; background: #4caf50; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Quiz Master</h1>
+            <p>Challenge yourself with 50 amazing quizzes!</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-num" id="totalQuizzes">50</div>
+                <div class="stat-label">Total Quizzes</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" id="completed">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" id="totalScore">0</div>
+                <div class="stat-label">Total Points</div>
+            </div>
+        </div>
+        
+        <div class="search-filter">
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search quizzes by name or topic..." oninput="filterQuizzes()">
+            <div class="filter-btns">
+                <button class="filter-btn active" onclick="filterByDifficulty('All')">🌟 All Quizzes</button>
+                <button class="filter-btn" onclick="filterByDifficulty('Easy')">😊 Easy</button>
+                <button class="filter-btn" onclick="filterByDifficulty('Medium')">🤔 Medium</button>
+                <button class="filter-btn" onclick="filterByDifficulty('Hard')">🔥 Hard</button>
+            </div>
+        </div>
+        
+        <div class="quiz-grid" id="quizGrid"></div>
+    </div>
+    
+    <script>
+        const quizzes = [
+            { id: 1, icon: '🔤', title: 'Alphabet Master', desc: 'Complete words with missing letters', questions: 10, difficulty: 'Easy' },
+            { id: 2, icon: '🔢', title: 'Math Basics', desc: 'Numbers, counting and simple math', questions: 10, difficulty: 'Easy' },
+            { id: 3, icon: '🎨', title: 'Color World', desc: 'Identify and name colors', questions: 10, difficulty: 'Easy' },
+            { id: 4, icon: '🐾', title: 'Animal Kingdom', desc: 'Guess animals from clues', questions: 10, difficulty: 'Easy' },
+            { id: 5, icon: '🍎', title: 'Healthy Foods', desc: 'Fruits and vegetables quiz', questions: 10, difficulty: 'Easy' },
+            { id: 6, icon: '🏠', title: 'Home Sweet Home', desc: 'House and family words', questions: 10, difficulty: 'Easy' },
+            { id: 7, icon: '🚗', title: 'Transportation', desc: 'Vehicles and travel', questions: 10, difficulty: 'Easy' },
+            { id: 8, icon: '⚽', title: 'Sports Arena', desc: 'Popular sports quiz', questions: 10, difficulty: 'Medium' },
+            { id: 9, icon: '🌍', title: 'World Geography', desc: 'Countries and capitals', questions: 10, difficulty: 'Medium' },
+            { id: 10, icon: '🎵', title: 'Music Instruments', desc: 'Identify musical instruments', questions: 10, difficulty: 'Medium' },
+            { id: 11, icon: '🦁', title: 'Wild Safari', desc: 'Jungle animals quiz', questions: 10, difficulty: 'Easy' },
+            { id: 12, icon: '🌊', title: 'Ocean Depths', desc: 'Marine life and sea creatures', questions: 10, difficulty: 'Medium' },
+            { id: 13, icon: '🌳', title: 'Plant Life', desc: 'Trees, flowers and plants', questions: 10, difficulty: 'Medium' },
+            { id: 14, icon: '☀️', title: 'Weather Watch', desc: 'Climate and seasons', questions: 10, difficulty: 'Easy' },
+            { id: 15, icon: '🏔️', title: 'Earth Features', desc: 'Mountains, rivers and more', questions: 10, difficulty: 'Hard' },
+            { id: 16, icon: '👨🔬', title: 'Science Fun', desc: 'Basic science concepts', questions: 10, difficulty: 'Medium' },
+            { id: 17, icon: '🔬', title: 'Human Body', desc: 'Anatomy and organs', questions: 10, difficulty: 'Medium' },
+            { id: 18, icon: '🌟', title: 'Space Explorer', desc: 'Planets and astronomy', questions: 10, difficulty: 'Hard' },
+            { id: 19, icon: '📚', title: 'Book Worm', desc: 'Famous books and authors', questions: 10, difficulty: 'Hard' },
+            { id: 20, icon: '🎬', title: 'Movie Magic', desc: 'Films and cinema', questions: 10, difficulty: 'Medium' },
+            { id: 21, icon: '🍕', title: 'World Cuisine', desc: 'International food', questions: 10, difficulty: 'Medium' },
+            { id: 22, icon: '🏛️', title: 'History Buff', desc: 'Historical events', questions: 10, difficulty: 'Hard' },
+            { id: 23, icon: '👑', title: 'Royal History', desc: 'Kings and queens', questions: 10, difficulty: 'Hard' },
+            { id: 24, icon: '🎭', title: 'Art Gallery', desc: 'Famous artists and art', questions: 10, difficulty: 'Hard' },
+            { id: 25, icon: '💻', title: 'Tech World', desc: 'Technology and computers', questions: 10, difficulty: 'Medium' },
+            { id: 26, icon: '🏆', title: 'Olympic Games', desc: 'Sports and records', questions: 10, difficulty: 'Medium' },
+            { id: 27, icon: '🎪', title: 'Circus Fun', desc: 'Entertainment quiz', questions: 10, difficulty: 'Easy' },
+            { id: 28, icon: '🏖️', title: 'Summer Vibes', desc: 'Beach and summer fun', questions: 10, difficulty: 'Easy' },
+            { id: 29, icon: '❄️', title: 'Winter Wonderland', desc: 'Snow and winter', questions: 10, difficulty: 'Easy' },
+            { id: 30, icon: '🎃', title: 'Festival Time', desc: 'Holidays and celebrations', questions: 10, difficulty: 'Medium' },
+            { id: 31, icon: '🐕', title: 'Pet Paradise', desc: 'Dogs, cats and pets', questions: 10, difficulty: 'Easy' },
+            { id: 32, icon: '🦋', title: 'Insect World', desc: 'Bugs and insects', questions: 10, difficulty: 'Medium' },
+            { id: 33, icon: '🦖', title: 'Dinosaur Era', desc: 'Prehistoric creatures', questions: 10, difficulty: 'Medium' },
+            { id: 34, icon: '🌈', title: 'Rainbow Science', desc: 'Light and colors', questions: 10, difficulty: 'Medium' },
+            { id: 35, icon: '⚡', title: 'Energy Power', desc: 'Electricity and energy', questions: 10, difficulty: 'Hard' },
+            { id: 36, icon: '🔥', title: 'Fire Safety', desc: 'Safety and prevention', questions: 10, difficulty: 'Easy' },
+            { id: 37, icon: '💧', title: 'Water World', desc: 'Water cycle and rivers', questions: 10, difficulty: 'Medium' },
+            { id: 38, icon: '🌱', title: 'Growing Plants', desc: 'Plant growth and care', questions: 10, difficulty: 'Easy' },
+            { id: 39, icon: '🍰', title: 'Kitchen Master', desc: 'Cooking and baking', questions: 10, difficulty: 'Easy' },
+            { id: 40, icon: '🎸', title: 'Music Genres', desc: 'Types of music', questions: 10, difficulty: 'Medium' },
+            { id: 41, icon: '📱', title: 'Social Media', desc: 'Apps and platforms', questions: 10, difficulty: 'Easy' },
+            { id: 42, icon: '🚀', title: 'Space Mission', desc: 'Rockets and exploration', questions: 10, difficulty: 'Hard' },
+            { id: 43, icon: '🏥', title: 'Health First', desc: 'Health and hygiene', questions: 10, difficulty: 'Easy' },
+            { id: 44, icon: '🎨', title: 'Art Studio', desc: 'Drawing and painting', questions: 10, difficulty: 'Medium' },
+            { id: 45, icon: '📐', title: 'Shape Master', desc: 'Geometry basics', questions: 10, difficulty: 'Medium' },
+            { id: 46, icon: '⏰', title: 'Time Keeper', desc: 'Clocks and time', questions: 10, difficulty: 'Easy' },
+            { id: 47, icon: '💰', title: 'Money Matters', desc: 'Currency and shopping', questions: 10, difficulty: 'Easy' },
+            { id: 48, icon: '🗺️', title: 'Map Reader', desc: 'Navigation and maps', questions: 10, difficulty: 'Medium' },
+            { id: 49, icon: '🎓', title: 'School Life', desc: 'School subjects', questions: 10, difficulty: 'Easy' },
+            { id: 50, icon: '🌟', title: 'Ultimate Challenge', desc: 'Mixed topics quiz', questions: 10, difficulty: 'Hard' }
+        ];
+        
+        let currentFilter = 'All';
+        
+        function loadStats() {
+            const stats = JSON.parse(localStorage.getItem('quizStats') || '{}');
+            const completed = Object.keys(stats).length;
+            const totalScore = Object.values(stats).reduce((sum, s) => sum + (s.total || 0), 0);
+            document.getElementById('completed').textContent = completed;
+            document.getElementById('totalScore').textContent = totalScore;
+        }
+        
+        function renderQuizzes(filter = 'All', search = '') {
+            const grid = document.getElementById('quizGrid');
+            grid.innerHTML = '';
+            const stats = JSON.parse(localStorage.getItem('quizStats') || '{}');
+            
+            quizzes.forEach(quiz => {
+                if (filter !== 'All' && quiz.difficulty !== filter) return;
+                if (search && !quiz.title.toLowerCase().includes(search.toLowerCase()) && !quiz.desc.toLowerCase().includes(search.toLowerCase())) return;
+                
+                const quizStat = stats[quiz.id];
+                const completed = quizStat ? `<div class="completed-badge">✓ Done</div>` : '';
+                const bestScore = quizStat ? `<div class="best-score">🏆 Best: ${quizStat.score}/10 | Total: ${quizStat.total} pts</div>` : '';
+                
+                const card = document.createElement('div');
+                card.className = 'quiz-card';
+                card.innerHTML = `
+                    ${completed}
+                    <div class="quiz-icon">${quiz.icon}</div>
+                    <div class="quiz-title">${quiz.title}</div>
+                    <div class="quiz-desc">${quiz.desc}</div>
+                    <div class="quiz-meta">
+                        <div class="quiz-info">📝 ${quiz.questions} Questions</div>
+                        <div class="difficulty ${quiz.difficulty}">${quiz.difficulty}</div>
+                    </div>
+                    ${bestScore}
+                `;
+                card.onclick = () => window.location.href = `quiz.html?id=${quiz.id}`;
+                grid.appendChild(card);
+            });
+        }
+        
+        function filterByDifficulty(difficulty) {
+            currentFilter = difficulty;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderQuizzes(difficulty, document.getElementById('searchBox').value);
+        }
+        
+        function filterQuizzes() {
+            renderQuizzes(currentFilter, document.getElementById('searchBox').value);
+        }
+        
+        loadStats();
+        renderQuizzes();
+    </script>
+</body>
+</html>
